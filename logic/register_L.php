@@ -19,13 +19,18 @@
         header("Location: index.php");
         exit;
     }
-    else
-    {
-        require BASE_DIR. "/classes/DBHandler.php";
-        $dbHandler = new DBHandler();
-        $dbHandler->InsertNewUser($username, $email, $firstname, $surname, $password);
 
+    require BASE_DIR. "/classes/DBHandler.php";
+    $dbHandler = new DBHandler();
+
+    if($dbHandler->InsertNewUser($username, $email, $firstname, $surname, $password))
+    {
         $_SESSION['message'] = "Erfolgreich registriert";
         header("Location: index.php");
         exit;
     }
+
+    $_SESSION['message'] = "Cant connect to db";
+    $_SESSION['action'] = "mainmenu";
+    header("Location: index.php");
+    exit;

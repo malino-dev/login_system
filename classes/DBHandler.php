@@ -7,10 +7,17 @@
         private $dbname = "marino";
     
         private $connection;
-    
+
         private function OpenConnection()
         {
             $this->connection = new mysqli($this->servername, $this->dbuser, $this->dbpassword, $this->dbname);
+
+            if($this->connection->connect_errno)
+            {
+                return false;
+            }
+
+            return true;
         }
     
         private function CloseConnection()
@@ -21,7 +28,7 @@
     
         public function InsertNewUser($username, $email, $vorname, $nachname, $password)
         {
-            $this->OpenConnection();
+            if(!$this->OpenConnection()) return false;
     
             $sql = file_get_contents(BASE_DIR. "/sql/InsertNewUser.sql");
 
@@ -30,11 +37,12 @@
             $statement->execute();
     
             $this->CloseConnection();
+            return true;
         }
 
         public function Login($username, $password, &$id)
         {
-            $this->OpenConnection();
+            if(!$this->OpenConnection()) return false;
 
             $sql = file_get_contents(BASE_DIR. "/sql/LoginUser.sql");
 
@@ -68,7 +76,7 @@
 
         public function GetAllUsers()
         {
-            $this->OpenConnection();
+            if(!$this->OpenConnection()) return false;
             
             $sql = file_get_contents(BASE_DIR. "/sql/GetAllUsers.sql");
 
@@ -83,7 +91,10 @@
 
         public function GetProfileInfo($id)
         {
-            $profileInfo = array();
+            $profileInfo = array(
+                'firstname' => "",
+                'surname' => ""
+            );
 
             $this->OpenConnection();
 
@@ -93,11 +104,8 @@
             $stmt->execute();
             $stmt->store_result();
 
-            $stmt->bind_result($firstname, $surname);
+            $stmt->bind_result($profileInfo['firstname'], $profileInfo['surname']);
             $stmt->fetch();
-
-            $profileInfo["firstname"] = $firstname;
-            $profileInfo["surname"] = $surname;
 
             //print_r($profileInfo);
 
@@ -117,5 +125,6 @@
             $stmt->execute();
 
             $this->CloseConnection();
+            return true;
         }
     }
